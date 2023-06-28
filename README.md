@@ -18,6 +18,13 @@ Build using Flask, see https://flask.palletsprojects.com/en/2.2.x/
      ```
 	 pip install -r REQUIREMENTS.txt
 	 ```
+	 ```
+	 Run the Python interpreter and type the commands:
+	 	>>> import nltk
+		>>> nltk.download()
+	 Install all elements from nltk
+	
+
 	
   3. Run
   

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<div class="row">
+  <div class="col s6 offset-s3">
+    <h1>Upload Image</h1>
+    <form method="POST">
+     <input type=file name=file id="file">
+      <input type=submit value=Upload>
+    </form>
+  </div>
+</div>
+
+
+{% endblock content %}

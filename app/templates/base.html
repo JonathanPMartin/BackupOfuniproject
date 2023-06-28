@@ -48,10 +48,13 @@
 	  <li><a href="{{ url_for('basket')}}">Basket</a></li>
 	  {% endif %}
 	  <!-- Show Login or Other depending on session -->
+    <!-- upload_file-->
 	  {% if session["user"] %}
 	  <li><a href="{{ url_for('settings', userId=session['user']) }}">Settings</a></li>
 	  <li><a href="{{ url_for('logout') }}">Logout</a></li>
+    
 	  {% else %}
+
 	  <li><a href="{{ url_for('login')}}">Login</a></li>
 	  {% endif %}
 	</ul>

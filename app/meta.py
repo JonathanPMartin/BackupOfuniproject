@@ -9,17 +9,20 @@ Contains App definition and database init functionality
 """
 
 
-
+import os
 import flask
-from flask import g
+from flask import g, make_response,render_template,request,redirect
 import sqlite3
+
 
 DATABASE = 'database.db'
 UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 
 app = flask.Flask(__name__)
-
+from flask_cors import CORS
+CORS(app)
 app.config.update(
     SECRET_KEY="secr3t!",
     SESSION_COOKIE_SAMESITE='Strict',

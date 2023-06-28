@@ -18,7 +18,7 @@
       {% for item in bookList %}
       <div class="carousel-item" href="#{{item.id}}">
 	<a href="{{ url_for('products', item=item.id) }}">
-	  <img class="responsive-img"  src="{{ url_for('serve_image', name=item.image)}}">
+	  <img class="responsive-img"  src="{{ url_for('serve_image', name=item.image)}}","https://paradoxplace.co.uk/wp-content/uploads/2022/04/download-1.jpg">
 	</a>
       </div>
       {% endfor %}

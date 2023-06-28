@@ -1,0 +1,5 @@
+sqlite3 database.db < schema.sql
+ . venv/bin/activate
+ cd 6005-CW-Teplate/
+ export FLASK_APP=app
+ flask run --host=0.0.0.0
