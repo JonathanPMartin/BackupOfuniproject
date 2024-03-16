@@ -1,5 +1,4 @@
 flask
-.Meta
 Requests
 datetime
 asyncio

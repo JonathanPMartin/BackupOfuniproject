@@ -1,3 +1,4 @@
+from multiprocessing import Value
 from .meta import *
 import requests
 import datetime
@@ -16,7 +17,6 @@ import re
 import threading
 import hashlib
 from bs4 import BeautifulSoup
-from newsapi import NewsApiClient
 import pycountry
 from werkzeug.utils import secure_filename
 def GetLeaders():
@@ -108,6 +108,14 @@ def CheckPolLean(Site):
             useless=0
         print(check)
     print(rows[0])
+def GetStockInfo(Stock,Start,End):
+    url="https://api.twelvedata.com/time_series?symbol="+Stock+"&interval=30min&start_date="+Start+"&end_date="+End+"&apikey=5eb91eed0cb149eaa54cb7acc41210ee&source=docs"
+    res=requests.get(url)
+    resJson=res.json()
+    values=resJson['values']
+    return values
+   #url="https://api.twelvedata.com/time_series?symbol=AAPL&interval=30min&start_date=2020-01-01&end_date=2023-01-01&apikey=5eb91eed0cb149eaa54cb7acc41210ee&source=docs"
+  
 def News2(site):
     url="https://newsapi.org/v2/everything?q=politics&domains="+site+"&apiKey=54de7376d5474ca0a6e7ec9ecd81ca26"
     tem="https://newsapi.org/v2/everything?q=politics&domains=bbc.co.uk&apiKey=54de7376d5474ca0a6e7ec9ecd81ca26"
@@ -586,7 +594,7 @@ def test2():
     rows = query_db("SELECT * FROM SiteData")
     #print(rows)
     return flask.render_template("news.html",sources = rows)
-    
+   
 @app.route("/newsData4")
 def test3():
     theQry = "Update SiteData Set LabourScore =0,LabourCount=0,LibDemCount=0,LibDemScore=0,ConservativeCount=0,ConservativeScore=0 Where SiteName != 'Smith'"
@@ -594,6 +602,121 @@ def test3():
     rows = query_db("SELECT * FROM SiteData")
     #print(rows)
     return flask.render_template("news.html",sources = rows)
+@app.route("/GetStock/<CurStock>")
+def stock(CurStock):
+    #url="https://api.twelvedata.com/time_series?symbol=AAPL&interval=30min&start_date=2020-01-01&end_date=2023-01-01&apikey=5eb91eed0cb149eaa54cb7acc41210ee&source=docs"
+    stock=CurStock
+    data=GetStockInfo(stock,'2020-01-01','2023-01-01')
+    #Qry="INSERT INTO StockInfo (Stock, Value, time, day, month, year) VALUES ('APPl',20.4,'10:30','01','02','2022')"
+    #Qry="INSERT INTO StockInfo (Stock, Value, time, day, month, year) VALUES ('AAPL',128.9,'15:30:','30','12','2022')"
+    #userQry = write_db(Qry)
+    """
+    time=data[0]["datetime"]
+    year=time[0:4]
+    month=time[5:7]
+    day=time[8:10]
+    hour=time[11:16]
+    value=float(data[0]["open"])
+    """
+    #Qry="INSERT INTO StockInfo (Stock, Value, time, day, month, year) VALUES ('{}',{},'{}','{}','{}','{}')".format(stock,value,hour,day,month,year)
+    
+    #print(Qry)
+    #userQry =  write_db(Qry)
+    x=True
+    while x:
+        
+        for i in range(0,len(data)):
+            time=data[i]["datetime"]
+            year=time[0:4]
+            month=time[5:7]
+            day=time[8:10]
+            hour=time[11:16]
+            value=float(data[i]["open"])
+            Qry="INSERT INTO StockInfo (Stock, Value, time, day, month, year) VALUES ('{}',{},'{}','{}','{}','{}')".format(stock,value,hour,day,month,year)
+            userQry =  write_db(Qry)
+            #print('true')
+            print(time[0:10])
+        tem=data[len(data)-1]["datetime"]
+        year=tem[0:4]
+        if year=='2020':
+            x=False
+        else:
+            
+            data=GetStockInfo(stock,'2020-01-01',tem[0:10])
+    #Qry="INSERT INTO StockInfo (Stock, Value, time, day
+        
+    return flask.render_template("news.html",sources =data)
+@app.route("/CalStockTimeDif/<CurStock>")
+def Stock2(CurStock):
+    Qry="select  day, month, year from StockInfo where Stock='{}' and time='15:00'".format(CurStock)
+    userQry=query_db(Qry)
+    data=[]
+    data2=[]
+    for i in userQry:
+        tem=[]
+        tem.append(i["day"])
+        tem.append(i["month"])
+        tem.append(i["year"])
+        data.append(tem)
+    #data=[data[2]]
+    for i in data:
+        Values=[]
+        Times=[]
+        Qry="select Value,time from StockInfo where Stock='{}' and day='{}' and month='{}' and year='{}'".format(CurStock,i[0],i[1],i[2])
+        Qry2=query_db(Qry)
+        
+        for j in Qry2:
+            Values.append(j["Value"])
+            Times.append(j["time"])
+        for j in range(0,len(Qry2)-1):
+           val1=Qry2[j]["Value"]
+           time1=Qry2[j]["time"]
+           val2=0
+           time2=0
+           for k in range(j+1,len(Qry2)):
+               val2=Qry2[k]["Value"]
+               time2=Qry2[k]["time"]
+               rate=0
+               change="NA"
+               if val1<val2:
+                     rate=(((val2-val1)/val2)*100)
+                     change="DOWN"
+               elif val2<val1:
+                    rate=(((val1-val2)/val2)*100)
+                    change="UP"
+               Qry="INSERT INTO StockCompare (Stock, Time1, Time2,Change,Rate, day, month, year) VALUES ('{}','{}','{}','{}',{},'{}','{}','{}')".format(CurStock,time2,time1,change,rate,i[0],i[1],i[2])
+               userQry =  write_db(Qry)
+           
+               print(change)
+           
+          
+           print(time2)
+        """for j in range(len(Values)-2,len(Values)-1):
+            print(Times[j])
+            print(Values[j])
+            print(Times[j+1])
+            print(Values[j+1])
+            for k in range(j+1,len(Values)):
+                print(i)
+                print(j<k)
+                rate=0
+                change="NA"
+                if(j<k):
+                    rate=(((Values[k]-Values[j])/Values[k])*100)
+                    change="UP"
+                elif(k<j):
+                    rate=(((Values[j]-Values[k])/Values[k])*100)
+                    change="DOWN"
+                else:
+                   usless=0
+                Qry="INSERT INTO StockCompare (Stock, Time1, Time2,Change,Rate, day, month, year) VALUES ('{}','{}','{}','{}',{},'{}','{}','{}')".format(CurStock,Times[k],Times[j],change,rate,i[0],i[1],i[2])
+                userQry =  write_db(Qry)
+                
+        data2=Times
+        """
+            
+    return flask.render_template("news.html",sources =data)
+    
 @app.route("/products", methods=["GET","POST"])
 
 def products():

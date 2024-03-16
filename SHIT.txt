@@ -3,3 +3,9 @@ sqlite3 database.db < schema.sql
  cd 6005-CW-Teplate/
  export FLASK_APP=app
  flask run --host=0.0.0.0
+Venv Activation:
+C:\Users\Jonat\Desktop\Programs\env\Scripts\Activate.ps1
+sql activation:
+C:\WINDOWS\system32\sqlite\sqlite3.exe
+set FLASK_APP=app
+flask run
